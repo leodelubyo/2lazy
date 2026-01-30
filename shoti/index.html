@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Shxti</title>
+<meta name="description" content="Professional profile for Shxti - Content Creator & 'Creator'">
+    <link rel="icon" type="image/png" href="pic/SOLAVITA.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<video id="bgVid" playsinline muted autoplay loop src="pic/background.mp4"></video>
+
+<div id="splash">
+  <img src="pic/SOLAVITA.png" alt="Logo">
+  <p>Click to Continue</p>
+</div>
+
+<div class="page">
+  <div class="card" id="card">
+    <div class="banner">
+      <img src="pic/shoti.gif">
+      <canvas class="particles" id="particles"></canvas>
+    </div>
+
+    <div class="avatarWrap">
+      <img id="avatarLg" class="avatar" alt="avatar" src="pic/shoti.png">
+    </div>
+
+    <div class="content">
+      <div class="header">
+        <div class="name" id="fullName">Shxti</div>
+        <div class="handle" id="handle">@Shxti</div>
+        <div class="typewriter" id="typeWriter"></div>
+        <div class="status">
+          <div class="status-dot" id="statusDot"></div>
+          <div id="statusLabel">Online</div>
+        </div>
+      </div>
+
+      <p class="desc" id="desc">'Creator' Anak Ni Kacy Agatha.</p>
+      <div class="badges" id="smallBadges"></div>
+      <div class="links" id="linksRow"></div>
+
+      <div class="footer">
+        <div id="joinedText">Joined 2021</div>
+        <div id="viewsText">
+          <img src="https://cdn-icons-png.flaticon.com/512/159/159604.png" width="16" /> 0
+        </div>
+        <div class="audio">
+          <button id="playBtn" title="Play"><img src="https://cdn-icons-png.flaticon.com/512/727/727245.png"></button>
+          <button id="pauseBtn" title="Pause"><img src="https://cdn-icons-png.flaticon.com/512/727/727239.png"></button>
+          <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.5" />
+        </div>
+      </div>
+    </div>
+    <audio id="bgAudio" loop></audio>
+  </div>
+</div>
+
+<script>
+// ====== CONFIGURATION ======
+const CONFIG = {
+  discordId: "1231035322108874795",
+  name: "Shxti",
+  handle: "@Shxti",
+  bio: "Anak Ni Kacy Agatha",
+  avatar: "pic/shoti.png",
+  badges: [
+    { img: "https://cdn-icons-png.flaticon.com/128/4945/4945914.png", href: "https://discord.gg/BnpYSVT4" },
+    { img: "https://cdn-icons-png.flaticon.com/128/17701/17701286.png", href: "https://discord.com/users/1231035322108874795" }
+  ],
+  backgroundAudio: "https://image2url.com/r2/default/audio/1769763128640-8b654441-0779-42a0-a96e-3f16c797a07d.mp3",
+  links: [
+    { title: "Discord Server", sub: "Shxti Community", href: "https://discord.gg/BnpYSVT4", icon: "https://cdn-icons-png.flaticon.com/128/5968/5968756.png" },
+    { title: "YouTube", sub: "Subscribe", href: "https://www.youtube.com/@Shxtiwho", icon: "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/youtube.svg" },
+    { title: "Tiktok", sub: "Follow", href: "https://www.tiktok.com/@shxti2softie", icon: "https://cdn-icons-png.flaticon.com/512/1946/1946552.png" },
+    
+  ]
+};
+
+const $ = s => document.querySelector(s);
+const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
+
+$('#splash').addEventListener('click', () => {
+  $('#splash').classList.add('hidden');
+  $('.page').classList.add('visible');
+  const audio = $('#bgAudio');
+  audio.muted = false;
+  audio.play().catch(() => {});
+});
+
+function getCreatedAt(id) {
+  const base = 1420070400000n;
+  const snow = BigInt(id);
+  return new Date(Number((snow >> 22n) + base));
+}
+
+async function fetchStatus() {
+  try {
+    const r = await fetch(`https://api.lanyard.rest/v1/users/${CONFIG.discordId}`);
+    if (!r.ok) return null;
+    return (await r.json()).data.discord_status;
+  } catch (e) { return null; }
+}
+
+function boot() {
+  const audio = $('#bgAudio');
+  audio.src = CONFIG.backgroundAudio;
+  audio.loop = true;
+  audio.volume = 0.5;
+  audio.muted = true;
+
+  $('#playBtn').onclick = () => { audio.muted = false; audio.play(); };
+  $('#pauseBtn').onclick = () => audio.pause();
+  $('#volumeSlider').oninput = e => audio.volume = e.target.value;
+
+  $('#avatarLg').src = CONFIG.avatar;
+  $('#fullName').textContent = CONFIG.name;
+  $('#handle').textContent = CONFIG.handle;
+  $('#desc').textContent = CONFIG.bio;
+  $('#smallBadges').innerHTML = CONFIG.badges.map(b => `<a href="${b.href}" target="_blank"><img src="${b.img}"></a>`).join('');
+  buildLinks();
+
+  const created = getCreatedAt(CONFIG.discordId);
+  $('#joinedText').textContent = "Joined " + created.getFullYear();
+
+  updateViews();
+  setInterval(updateViews, 1500);
+  startTypewriter();
+  updateStatus();
+  initParticles();
+}
+
+function buildLinks() {
+  const row = $('#linksRow');
+  row.innerHTML = '';
+  CONFIG.links.forEach(it => {
+    const a = el('a', 'link');
+    a.href = it.href;
+    a.target = '_blank';
+    const icon = el('div', 'icon');
+    const img = document.createElement('img');
+    img.src = it.icon;
+    icon.appendChild(img);
+    const txt = el('div', 'linkText');
+    const lab = el('div', 'label');
+    lab.textContent = it.title;
+    const sub = el('div', 'sub');
+    sub.textContent = it.sub;
+    txt.append(lab, sub);
+    a.append(icon, txt);
+    row.append(a);
+  });
+}
+
+function updateViews() {
+  // Simulate views count since the PHP file doesn't exist
+  const views = Math.floor(Math.random() * 10000) + 1000;
+  $('#viewsText').innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/159/159604.png" width="16" /> ${views.toLocaleString()} views`;
+}
+function getViews() {
+  const stored = localStorage.getItem('uniqueVisitors');
+  return stored ? parseInt(stored) : 0;
+}
+
+function hasVisitedThisSession() {
+  return sessionStorage.getItem('hasVisited') === 'true';
+}
+
+function markSessionVisited() {
+  sessionStorage.setItem('hasVisited', 'true');
+}
+
+function incrementViews() {
+  // Only increment if this is a new session
+  if (!hasVisitedThisSession()) {
+    const current = getViews();
+    const newCount = current + 1;
+    localStorage.setItem('uniqueVisitors', newCount);
+    markSessionVisited();
+    return newCount;
+  }
+  return getViews();
+}
+
+function updateViews() {
+    const count = incrementViews();
+    $('#viewsText').innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/159/159604.png" width="18" /> ${count.toLocaleString()} views`;
+}
+function startTypewriter() {
+  const t = $('#typeWriter');
+  const arr = ['Shxti','Creator'];
+  let i = 0, j = 0;
+  setInterval(() => {
+    const s = arr[i];
+    t.textContent = s.slice(0, j);
+    j++;
+    if (j > s.length + 8) { j = 0; i = (i + 1) % arr.length; }
+  }, 75);
+}
+
+async function updateStatus() {
+  const s = await fetchStatus();
+  if (!s) return;
+  const c = { online: "#29ffd1", idle: "#ffb200", dnd: "#ff4d4d", offline: "#6b7280" };
+  $('#statusLabel').textContent = s.charAt(0).toUpperCase() + s.slice(1);
+  $('#statusDot').style.color = c[s] || "#6b7280";
+}
+
+function initParticles() {
+  const c = $('#particles');
+  const ctx = c.getContext('2d');
+  const resize = () => { c.width = c.offsetWidth; c.height = c.offsetHeight; };
+  resize();
+  window.addEventListener('resize', resize);
+
+  const p = Array.from({ length: 60 }, () => ({
+    x: Math.random() * c.width,
+    y: Math.random() * c.height,
+    r: Math.random() * 1.6 + .5,
+    vx: (Math.random() - .5) * .45,
+    vy: (Math.random() - .5) * .45
+  }));
+
+  (function draw() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.globalCompositeOperation = 'lighter';
+    for (const d of p) {
+      d.x += d.vx; d.y += d.vy;
+      if (d.x < 0) d.x = c.width;
+      if (d.x > c.width) d.x = 0;
+      if (d.y < 0) d.y = c.height;
+      if (d.y > c.height) d.y = 0;
+      const a = .06 + d.r * .02;
+      const g = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.r * 4);
+      g.addColorStop(0, `rgba(124,77,255,${a})`);
+      g.addColorStop(1, `rgba(42,168,255,${a * .7})`);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  })();
+}
+
+window.addEventListener('load', boot);
+</script>
+</body>
+</html>

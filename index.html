@@ -1,0 +1,105 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=5.0">
+    <title>2lazy</title>
+
+    <link rel="icon" type="image/png" href="css/SOLAVITA.png">
+
+    <link rel="stylesheet" href="css/style.css.css">
+<div id="uuidMachine"></div></head>
+<body>
+
+    <div id="splash" onclick="startPage()">
+        <img src="css/SOLAVITA.png" class="splash-logo" alt="2lazy Logo">
+        <p>Click anywhere</p>
+    </div>
+
+    <div class="watermark">2lazy</div>
+
+    <div class="container" id="mainContent">
+    <div class="header-title">2lazy</div>
+
+        <div class="main-card">
+
+            <div class="member-grid">
+                    <a class="member-item member-link" href="shoti/index.html">
+                    <div class="custom-popup">shoti</div>
+                    <img src="shoti/pic/shoti.png" class="avatar" alt="shoti">
+                    <span class="member-name">shoti</span>
+                    </a>
+
+            </div>
+        </div>
+        <div class="join-bar">
+            <span class="member-count">PASOK TANG INA NIYO</span>
+            <a href="https://discord.gg/BnpYSVT4" target="_blank" class="join-btn">JOIN</a>
+        </div>
+    </div>
+
+    <div class="music-player" id="fixedPlayer">
+        <div class="player-controls">
+            <div class="control-btn" onclick="prevSong()">⏮</div>
+            <div class="play-pause" id="playBtn" onclick="toggleMusic()">▶</div>
+            <div class="control-btn" onclick="nextSong()">⏭</div>
+        </div>
+        <div class="music-info">
+            <span class="song-title" id="songTitle">2lazy</span>
+            <span class="artist-name" id="artistName">shoti</span>
+        </div>
+        <audio id="bgMusic" loop="" src="css/music.mp3"></audio>
+    </div>
+
+    <script>
+        const audio = document.getElementById('bgMusic');
+        const playBtn = document.getElementById('playBtn');
+        const songTitle = document.getElementById('songTitle');
+        const artistName = document.getElementById('artistName');
+
+        let songIndex = 0;
+
+        const songs = [
+            { title: "2lazy", artist: "2lazy", src: "css/shoti.mp3" }
+        ];
+
+        function loadSong(song) {
+            songTitle.innerText = song.title;
+            artistName.innerText = song.artist;
+            audio.src = song.src;
+        }
+
+        loadSong(songs[songIndex]);
+
+        function startPage() {
+            document.getElementById('splash').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash').style.display = 'none';
+                document.getElementById('mainContent').style.opacity = '1';
+                document.getElementById('fixedPlayer').style.opacity = '1';
+            }, 1000);
+            audio.play();
+            playBtn.innerText = 'II';
+        }
+
+        function toggleMusic() {
+            if (audio.paused) { audio.play(); playBtn.innerText = 'II'; } 
+            else { audio.pause(); playBtn.innerText = '▶'; }
+        }
+
+        function nextSong() {
+            songIndex = (songIndex + 1) % songs.length;
+            loadSong(songs[songIndex]);
+            audio.play();
+            playBtn.innerText = 'II';
+        }
+
+        function prevSong() {
+            songIndex = (songIndex - 1 + songs.length) % songs.length;
+            loadSong(songs[songIndex]);
+            audio.play();
+            playBtn.innerText = 'II';
+        }
+    </script>
+<footer>
+  © 2lazy
+</footer>
+</body></html>
